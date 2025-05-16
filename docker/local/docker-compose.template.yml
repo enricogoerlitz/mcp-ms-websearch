@@ -1,0 +1,50 @@
+name: "emtec-ai-typecode-research"
+
+services:
+  frontend:
+    build:
+      context: ../../
+      dockerfile: ./docker/images/frontend/Dockerfile
+    container_name: frontend
+    restart: always
+    ports:
+      - "3000:80"
+    environment:
+      - BACKEND_ENDPOINT=http://backend-research-chat:8000
+
+  backend-research-chat:
+    build:
+      context: ../../
+      dockerfile: ./docker/images/backend/Dockerfile
+    container_name: backend-research-chat
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - FLASK_HOST=0.0.0.0
+      - FLASK_PORT=8000
+      - DEBUG=false
+      - AVAILABLE_PROCESS_UNITS=8
+      - DOCUMENT_DB_TYPE=MONGO_DB
+      - MONGODB_URI=mongodb://mongodb:27017
+      - MONGODB_DB_NAME=typecode-research
+      - MONGODB_COLLECTION_NAME=chats
+      - OPENAI_API_ENDPOINT_CHAT_COMPLEATIONS=https://api.openai.com/v1/chat/completions
+      - OPENAI_API_ENDPOINT_EMBEDDINGS=https://api.openai.com/v1/embeddings
+      - OPENAI_API_KEY={{ OPENAI_API_KEY }}
+
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - emtec-ai-device-type-agent_mongodb_data:/data/db
+
+volumes:
+  emtec-ai-device-type-agent_mongodb_data:
+    external: true
