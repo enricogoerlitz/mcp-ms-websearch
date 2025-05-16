@@ -1,0 +1,24 @@
+{
+    "Query": {
+        "Text": "How many books did hitler owned?\nwhat happened to hitler's fortune?\nWhen was the Second World War over?",
+        "MaxSearchResultCount": 5,
+        "MaxSearchQueryCount": 5
+    },
+
+    "WebDocumentsSearch": {
+        "Enabled": false,
+        "MaxDocumentMBSize": 1024
+    },
+
+    "DeppWebSearch": {
+        "Enabled": false,
+        "MaxDepth": 2
+    },
+
+    "Response": {
+        "Summarization": {
+            "Summarize": false,
+            "SummarizationContext": ""
+        }
+    }
+}

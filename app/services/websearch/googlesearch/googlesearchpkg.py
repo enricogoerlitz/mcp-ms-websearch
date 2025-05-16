@@ -1,4 +1,6 @@
 import googlesearch
+
+from urllib.parse import urlparse
 from services.websearch.googlesearch.base import IGoogleSearch
 
 
@@ -15,7 +17,7 @@ class GoogleSearchPKGImpl(IGoogleSearch):
         search_links = [
             link
             for link in search_links
-            if not (link in seen or seen.add(link))
+            if not (urlparse(link).path in seen or seen.add(urlparse(link).path))
         ][:max_link_count]
 
         return search_links
@@ -33,7 +35,7 @@ class GoogleSearchPKGImpl(IGoogleSearch):
             ".pdf" not in link
         )
 
-    def _n_results(n: int, i: int) -> int:
+    def _n_results(self, n: int, i: int) -> int:
         max_num = int(n * 2)
         num = int(n + (n * i) / 3)
         return num if num < max_num else max_num

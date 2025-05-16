@@ -5,7 +5,7 @@ playground/*.txt
 resources/assets/data/imt/*.xlsx
 resources/secrets.txt
 docker-compose.yml
-dev
+dev/*.txt
 
 .vscode
 # Byte-compiled / optimized / DLL files

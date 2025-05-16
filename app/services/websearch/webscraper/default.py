@@ -25,30 +25,32 @@ class DefaultWebScraper(IWebScraper):
         return result
 
     def _prepare_page_result(self, url: str, soup: BeautifulSoup) -> WebPageResult:
-        a_tags = [a_tag.extract() for a_tag in soup.find_all("a", href=True)]
+        a_tags = [a_tag for a_tag in soup.find_all("a", href=True)]
         host_url = wsutils.get_host_url(url)
         links, doc_links = self._extract_links(host_url, a_tags)
         text = wsutils.compress_soup_text(soup)
 
         return WebPageResult(
-            link=url,
+            url=url,
             content=text,
             links=links,
             document_links=doc_links
         )
 
     def _extract_links(self, host_url: str, a_tags: list[dict]) -> tuple[list[str], list[str]]:
-        pdf_links = []
         doc_links = []
+        links = []
         for a in a_tags:
             href: str = a["href"]
             if not href.startswith("http"):
                 continue
 
             if ".pdf" in href:
-                pdf_links.append(self._prepare_pdf_link(host_url, href))
+                doc_links.append(self._prepare_pdf_link(host_url, href))
             else:
-                doc_links.append(href)
+                links.append(href)
+
+        return links, doc_links
 
     def _prepare_pdf_link(self, host_url: str, url: str) -> str:
         if not url.startswith("http"):

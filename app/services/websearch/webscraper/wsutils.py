@@ -2,9 +2,7 @@ import io
 import re
 import requests
 import pdfplumber
-import gvars
 
-from collections import Counter
 from bs4 import BeautifulSoup
 from pdfplumber.page import Page
 from urllib.parse import urlparse
@@ -41,21 +39,10 @@ def get_host_url(url: str) -> str:
 
 
 def compress_soup_text(soup: BeautifulSoup) -> str:
-    for tag in soup(["a", "script", "style", "meta", "noscript", "footer", "header", "nav"]):
+    for tag in soup(["script", "style", "noscript", "nav"]):
         tag.decompose()
 
-    # Extract text and normalize whitespace
-    text = soup.get_text("\n\n", strip=True)
-    text = re.sub(r" {2,}", "", text)
-    text = re.sub(r"\t{2,}", "\t", text)
-    text = re.sub(r"\n{2,}", "\n\n", text)
-
-    # Remove stopwords to reduce unnecessary words
-    text = " ".join([word for word in text.split() if word.lower() not in gvars.STOP_WORDS])
-
-    # Deduplicate sentences based on frequency
-    sentences = re.split(r"(?<=[.!?])\s+", text)
-    sentence_counts = Counter(sentences)
-    text = " ".join(sentence_counts.keys())
+    text: str = soup.text
+    text = re.sub(r'\n{4,}', '\n\n\n', text)
 
     return text.strip()

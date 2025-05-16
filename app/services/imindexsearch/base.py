@@ -18,10 +18,10 @@ class IndexDBDocumentResult(IndexDBDocument):
 
 class IInMemoryIndexDB(ABC):
     @abstractmethod
-    def add(self, reference: str, text: str, embedding: np.ndarray) -> None: pass
+    def add(self, reference: str, texts: str, embedding: np.ndarray) -> None: pass
 
     @abstractmethod
-    def add_batch(self, reference: str, text: list[str], embedding: np.ndarray[np.ndarray]) -> None: pass
+    def add_batch(self, reference: str, texts: list[str], embedding: np.ndarray[np.ndarray]) -> None: pass
 
     @abstractmethod
     def search(self, query: str, k: int = 5) -> list[IndexDBDocumentResult]: pass

@@ -15,5 +15,7 @@ class InMemoryIndexDBFactory:
             case _:
                 raise ValueError(f"Unsupported indexdb type: {type}")
 
-
-indexdb: IInMemoryIndexDB = InMemoryIndexDBFactory.create(evars.INDEXDB_TYPE)
+    @staticmethod
+    def new() -> IInMemoryIndexDB:
+        index: IInMemoryIndexDB = InMemoryIndexDBFactory.create(evars.INDEXDB_TYPE)
+        return index

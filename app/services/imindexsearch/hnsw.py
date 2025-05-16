@@ -3,7 +3,7 @@ import openai
 import hnswlib
 
 from dataclasses import asdict
-from app.services.imindexsearch.base import (
+from services.imindexsearch.base import (
     IInMemoryIndexDB,
     IndexDBDocument,
     IndexDBDocumentResult
@@ -30,7 +30,7 @@ class HNSWInMemoryIndexDB(IInMemoryIndexDB):
     def add_batch(self, reference: str, texts: list[str], embeddings: np.ndarray[np.ndarray]) -> None:
         start_id = len(self._documents)
         self._documents |= {
-            i: IndexDBDocument(
+            (start_id + i): IndexDBDocument(
                 id=start_id + i,
                 reference=reference,
                 text=texts[i],
