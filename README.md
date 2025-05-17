@@ -4,22 +4,26 @@
 ```json
 // Parameters
 {
-    "Query": {
-        "Text": "string",                       // Query / Text of the user
-        "MaxSearchResultCount": 5,              // Max count of the search queries which will be generated
-        "MaxSearchQueryCount": 5                // Count of maximum used search results
+    "query": {
+        "messages": [
+            {"role": "string", "message": "string"}
+        ],                       // Query / Text of the user
+        "google_search": {
+            "max_query_count": 3,
+            "max_result_count": 5
+        },                      // Query / Text of the user
+        "vector_search": {
+            "result_count": 5
+        },
     },
 
-    "Process": {
-        "MaxRecursiveCalls": 5 // definition folgt
+
+    "web_document_search": {
+        "enabled": false,                       // Enable DocumentSearch
+        "max_document_mb_size": 1024               // Use only documents with lower MB then this
     },
 
-    "WebDocumentsSearch": {
-        "Enabled": false,                       // Enable DocumentSearch
-        "MaxDocumentMBSize": 1024               // Use only documents with lower MB then this
-    },
-
-    "DeppWebSearch": {                          // Search in sub links on scraped pages
+    "deep_web_search": {                          // Search in sub links on scraped pages
         "Enabled": false,
         "MaxDepth": 2                           // How deep the search goes | GoogleLinks: 1, Links on GoogleLinksPage: 2, Links on GoogleLinksSubPage: 3 ...
     },
@@ -39,14 +43,11 @@
 // 1. No summarization
 {
     "query": {
-        "messages": [
-            {"role": "string", "message": "string"}
-        ],
-        "googlesearch": [
+        "google_search": [
             "blub?",
             "blab?"
         ],
-        "vectorsearch": [
+        "vector_search": [
             "biba",
             "blablab"
         ]

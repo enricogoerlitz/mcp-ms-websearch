@@ -1,8 +1,8 @@
 import evars
 import gvars
 
-from services.websearch.webscraper.base import IWebScraper
-from services.websearch.webscraper.default import DefaultWebScraper
+from services.webscraper.base import IWebScraper
+from services.webscraper.default import DefaultWebScraper
 
 
 class WebScraperFactory:

@@ -1,8 +1,8 @@
 import gvars
 import evars
 
-from services.websearch.googlesearch.base import IGoogleSearch
-from services.websearch.googlesearch.googlesearchpkg import GoogleSearchPKGImpl
+from services.googlesearch.base import IGoogleSearch
+from services.googlesearch.googlesearchpkg import GoogleSearchPKGImpl
 
 
 class GoogleSearchFactory:
