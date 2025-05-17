@@ -38,23 +38,45 @@
 
 // 1. No summarization
 {
-    "Results": [
+    "query": {
+        "messages": [
+            {"role": "string", "message": "string"}
+        ],
+        "googlesearch": [
+            "blub?",
+            "blab?"
+        ],
+        "vectorsearch": [
+            "biba",
+            "blablab"
+        ]
+    },
+    "references": [
+        "https://bluub.com/wiki",
+        "https://blab.com/wiki/my.pdf"
+    ],
+    "errorReferences": [
+        "https://bluub.com/wiki/error",
+    ],
+    "results": [
         {
-            "Reference": "https://foo.bar.com/blub.pdf",
-            "ReferenceType": "DOCUMENT | WEBSITE",
-            "Content": "string"
+            "query": "blub",
+            "reference": "https://foo.bar.com/blub.pdf",
+            "text": "string",
+            "distance": 0.3574832
         },
         {
-            "Reference": "https://foo.bar.com/blub",
-            "ReferenceType": "DOCUMENT | WEBSITE",
-            "Content": "string"
+            "query": "blab",            
+            "reference": "https://foo.bar.com/blub",
+            "text": "string",
+            "distance": 0.3574832
         }
     ]
 }
 
 // 2. Summarized
 {
-    "Result": "Markdown-String, incl. reference links as Link formatted"
+    "Result": "# Markdown-String, incl. reference links as Link formatted"
 }
 ```
 

@@ -2,7 +2,6 @@ import numpy as np
 import openai
 import hnswlib
 
-from dataclasses import asdict
 from services.imindexsearch.base import (
     IInMemoryIndexDB,
     IndexDBDocument,
@@ -39,24 +38,20 @@ class HNSWInMemoryIndexDB(IInMemoryIndexDB):
             for i in range(0, len(texts))
         }
 
-    def search(self, query: str, k: int = 5) -> list[IndexDBDocumentResult]:
-        query_embedding = self._embed_query(query)
+    def search(self, query: str, k: int = 5, as_dict: bool = False) -> list[IndexDBDocumentResult] | list[dict]:
+        if len(self._documents) == 0 or len(query) == 0:
+            return []
 
+        query_embedding = self._embed_query(query)
         ids, embeddings = zip(*[(doc.id, doc.embedding) for doc in self._documents.values()])
 
         index = self._create_index(ids, embeddings)
-
         labels, distances = index.knn_query(query_embedding, k=k)
+        results = zip(labels[0], distances[0])
 
-        prepared_search_result = [
-            IndexDBDocumentResult(
-                distance=distance,
-                **asdict(self._documents[label])
-            )
-            for (label, distance) in zip(labels[0], distances[0])
-        ]
-
-        return prepared_search_result
+        if as_dict:
+            return [self._documents[label].to_result_dict(query, distance) for label, distance in results]
+        return [self._documents[label].to_result(query, distance) for label, distance in results]
 
     def _create_index(self, ids: list[int], embeddings: list[np.ndarray]) -> hnswlib.Index:
         index = hnswlib.Index(space=self._space, dim=embeddings[0].shape[0])
