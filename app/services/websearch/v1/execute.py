@@ -1,3 +1,6 @@
+import gvars
+import multiprocessing
+
 from concurrent.futures import ThreadPoolExecutor
 from services.websearch.base import IWebSearch
 from services.websearch.request import WebSearchRequest
@@ -8,9 +11,12 @@ from services.websearch.response import (
 from services.webscraper.base import WebPageResult
 from services.webscraper.scraper import webscraper
 from services.googlesearch.google import google
-from services.ai.aimodels import embedding_model
+from services.ai.aimodels import embedding_model, chat_model
 from services.ai import aiutils
 from services.imindexsearch.indexdb import InMemoryIndexDBFactory
+from services.websearch.v1.prompts.googlesearch import gen_google_queries_messages
+from services.websearch.v1.prompts.vectorsearch import gen_vector_search_queries_messages
+from services.websearch.v1.prompts.gglvecsearch import gen_google_and_vector_search_queries_messages
 
 
 class WebSearchV1(IWebSearch):
@@ -19,17 +25,18 @@ class WebSearchV1(IWebSearch):
         self._index = InMemoryIndexDBFactory.new()
 
     def execute(self, req: WebSearchRequest) -> WebSearchResponse:
-        # 1. Generate google queries
-        google_queries = self._generate_google_queries(req)
+        # 1. Generate google and vector search queries
+        queries = self._generate_google_and_vector_search_queries(req)
+        if queries is None:
+            return WebSearchResponse.empty()
 
-        # 2. Generate Vector queries
-        vector_queries_args, vector_queries = self._generate_vector_search_queries(req)
+        google_queries, vector_queries_args, vector_queries = queries
 
         # 3. Fetch google links
         search_links = google.search(google_queries, req.query.google_search.max_result_count)
 
         # 4. Execute Thread Pool for Multithreading
-        processes = min(8, len(search_links))
+        processes = min(multiprocessing.cpu_count(), len(search_links))
         with ThreadPoolExecutor(max_workers=processes) as pool:
             # 4.1 Scrape web pages
             scraped_pages: list[WebPageResult] = list(pool.map(webscraper.scrape, search_links))
@@ -56,21 +63,63 @@ class WebSearchV1(IWebSearch):
         )
 
     def _generate_google_queries(self, req: WebSearchRequest) -> list[str]:
-        google_queries = [
-            "Wann starb Eva Braun?"
-        ]
+        messages = gen_google_queries_messages(
+            n_queries=req.query.google_search.max_query_count,
+            chat_messages=req.query.messages,
+            prompt_context=req.query.google_search.prompt_context
+        )
+
+        queries_raw = chat_model.submit(messages)
+        if queries_raw == gvars.NO_QUESTION_ASKED:
+            return []
+
+        google_queries = queries_raw.split(gvars.AI_CHAT_ARRAY_RESPONSE_SEPERATOR)
 
         return google_queries
 
-    def _generate_vector_search_queries(self, req: WebSearchRequest) -> tuple[list[tuple[str, int, bool]], list[str]]:
-        vector_queries = [
-            "Wann starb Eva Braun"
-        ]
+    def _generate_vector_search_queries(self, req: WebSearchRequest, google_queries: list[str]) -> tuple[list[tuple[str, int, bool]], list[str]]:
+        messages = gen_vector_search_queries_messages(
+            google_queries=google_queries,
+            chat_messages=req.query.messages,
+            prompt_context=req.query.vector_search.prompt_context
+        )
 
-        return [
+        queries_raw = chat_model.submit(messages)
+        vector_queries = queries_raw.split(gvars.AI_CHAT_ARRAY_RESPONSE_SEPERATOR)
+
+        vector_queries_args = [
             (query, req.query.vector_search.result_count, True)
             for query in vector_queries
         ]
+
+        return vector_queries_args, vector_queries
+
+    def _generate_google_and_vector_search_queries(
+            self,
+            req: WebSearchRequest
+    ) -> tuple[list[str], list[str], list[tuple[str, int, bool]]] | None:
+        messages = gen_google_and_vector_search_queries_messages(
+            n_google_queries=req.query.google_search.max_query_count,
+            chat_messages=req.query.messages,
+            google_prompt_context=req.query.google_search.prompt_context,
+            vector_prompt_context=req.query.vector_search.prompt_context
+        )
+
+        queries_raw = chat_model.submit(messages)
+
+        if queries_raw == gvars.NO_QUESTION_ASKED or queries_raw == gvars.NO_QUESTION_ASKED_QUOAT:
+            return None
+
+        vector_queries_raw, google_queries_raw = (q for q in queries_raw.split("===split===") if q != "")
+
+        google_queries = google_queries_raw.split(gvars.AI_CHAT_ARRAY_RESPONSE_SEPERATOR)
+        vector_queries = vector_queries_raw.split(gvars.AI_CHAT_ARRAY_RESPONSE_SEPERATOR)
+        vector_queries_args = [
+            (query, req.query.vector_search.result_count, True)
+            for query in vector_queries
+        ]
+
+        return google_queries, vector_queries_args, vector_queries
 
     def _prepare_page_results(self, page_results: list[WebPageResult]) -> tuple[list[WebPageResult], list[list[str]], list[str]]:
         prep_results = []

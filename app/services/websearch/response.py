@@ -27,3 +27,12 @@ class WebSearchResponse:
     references: list[str]
     error_references: list[str]
     results: list[dict]
+
+    @staticmethod
+    def empty() -> "WebSearchResponse":
+        return WebSearchResponse(
+            query=ResponseQuery(google_search=[], vector_search=[]),
+            references=[],
+            error_references=[],
+            results=[]
+        )

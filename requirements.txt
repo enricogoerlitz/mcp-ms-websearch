@@ -1,8 +1,9 @@
-openai==1.78.1
 flask==3.1.1
 flask_cors==5.0.1
+pydantic==2.11.4
 gunicorn==23.0.0
 dotenv==0.9.9
 requests==2.32.3
 numpy==2.2.5
+openai==1.78.1
 pdfplumber==0.11.6

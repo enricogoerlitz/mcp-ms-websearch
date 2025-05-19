@@ -1,7 +1,7 @@
 import googlesearch
 
 from urllib.parse import urlparse
-from services.websearch.googlesearch.base import IGoogleSearch
+from services.googlesearch.base import IGoogleSearch
 
 
 class GoogleSearchPKGImpl(IGoogleSearch):

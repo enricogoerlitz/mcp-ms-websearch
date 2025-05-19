@@ -1,3 +1,8 @@
+import json
+import time
+import evars
+
+from dataclasses import asdict
 from services.websearch.websearch import WebSearchFactory
 from services.websearch.request import (
     WebSearchRequest,
@@ -5,22 +10,24 @@ from services.websearch.request import (
     RequestQueryGoogleSearch,
     RequestWebDocumentSearch,
     RequestDeepWebSearch,
-    RequestQueryMessage,
     RequestQueryVectorSearch
 )
 
 
 if __name__ == "__main__":
+    print(evars.AI_CHAT_MODEL_PROVIDER)
     req = WebSearchRequest(
         query=RequestQuery(
             messages=[
-                RequestQueryMessage(role="user", message="message")
+                {"role": "user", "content": "Wann kam Hitler an die Macht und wann starb sein Frau?"}
             ],
             google_search=RequestQueryGoogleSearch(
+                prompt_context=None,
                 max_query_count=5,
                 max_result_count=5
             ),
             vector_search=RequestQueryVectorSearch(
+                prompt_context=None,
                 result_count=5
             )
         ),
@@ -29,4 +36,18 @@ if __name__ == "__main__":
     )
 
     websearch = WebSearchFactory.create("v1")
+
+    start = time.time()
+
     result = websearch.execute(req)
+
+    end = time.time()
+    print("\n\n\n", "#" * 30, "\n\n\n")
+    print(f"Ausführungsdauer: {end - start:.4f} Sekunden")
+
+    result_dict = asdict(result)
+    with open("../dev/result-websearch-2.json", "w", encoding="utf-8") as f:
+        json.dump(result_dict, f, ensure_ascii=False, indent=4)
+
+    # with open("../dev/result-websearch-1.json", "w") as f:
+    #     f.write(json.dumps(result_dict, indent=4))

@@ -2,8 +2,8 @@ import requests
 import evars
 
 from bs4 import BeautifulSoup
-from services.websearch.webscraper.base import IWebScraper, WebPageResult
-from services.websearch.webscraper import wsutils
+from services.webscraper.base import IWebScraper, WebPageResult
+from services.webscraper import wsutils
 from logger import logger
 
 

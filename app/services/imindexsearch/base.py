@@ -23,7 +23,7 @@ class IndexDBDocument:
             reference=self.reference,
             text=self.text,
             query=query,
-            distance=distance
+            distance=float(distance)
         )
 
     def to_result_dict(self, query: str, distance: float) -> dict:

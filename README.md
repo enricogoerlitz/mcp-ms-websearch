@@ -9,10 +9,12 @@
             {"role": "string", "message": "string"}
         ],                       // Query / Text of the user
         "google_search": {
+            "prompt_context": "string | None",
             "max_query_count": 3,
             "max_result_count": 5
         },                      // Query / Text of the user
         "vector_search": {
+            "prompt_context": "string | None",
             "result_count": 5
         },
     },
