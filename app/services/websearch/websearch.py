@@ -9,4 +9,4 @@ class WebSearchFactory:
             case "v1":
                 return WebSearchV1()
             case _:
-                raise ValueError(f"Unsupported websearch version: {version}")
+                raise Exception(f"Unsupported websearch version: {version}")

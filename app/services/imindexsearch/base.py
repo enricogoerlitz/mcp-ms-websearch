@@ -20,9 +20,9 @@ class IndexDBDocument:
 
     def to_result(self, query: str, distance: float) -> IndexDBDocumentResult:
         return IndexDBDocumentResult(
+            query=query,
             reference=self.reference,
             text=self.text,
-            query=query,
             distance=float(distance)
         )
 

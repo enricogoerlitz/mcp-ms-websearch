@@ -10,7 +10,9 @@ from services.websearch.request import (
     RequestQueryGoogleSearch,
     RequestWebDocumentSearch,
     RequestDeepWebSearch,
-    RequestQueryVectorSearch
+    RequestQueryVectorSearch,
+    RequestResponse,
+    RequestResponseSummarization,
 )
 
 
@@ -19,11 +21,11 @@ if __name__ == "__main__":
     req = WebSearchRequest(
         query=RequestQuery(
             messages=[
-                {"role": "user", "content": "Wann kam Hitler an die Macht und wann starb sein Frau?"}
+                {"role": "user", "content": "Wann starb Hitlers sein Frau?"}
+                # {"role": "user", "content": "Wann kam Hitler an die Macht und wann starb sein Frau?"}
             ],
             google_search=RequestQueryGoogleSearch(
                 prompt_context=None,
-                max_query_count=5,
                 max_result_count=5
             ),
             vector_search=RequestQueryVectorSearch(
@@ -32,7 +34,13 @@ if __name__ == "__main__":
             )
         ),
         web_document_search=RequestWebDocumentSearch(enabled=False, max_documents=5, max_document_mb_size=1024),
-        deep_web_search=RequestDeepWebSearch(enabled=False, max_depth=2)
+        deep_web_search=RequestDeepWebSearch(enabled=False, max_depth=2),
+        response=RequestResponse(
+            summarization=RequestResponseSummarization(
+                enabled=True,
+                prompt_context=None
+            )
+        )
     )
 
     websearch = WebSearchFactory.create("v1")

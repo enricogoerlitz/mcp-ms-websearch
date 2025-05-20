@@ -10,4 +10,5 @@ if __name__ == "__main__":
         host=evars.FLASK_HOST,
         debug=evars.DEBUG,
         port=evars.FLASK_PORT,
+        threaded=True
     )

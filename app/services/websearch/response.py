@@ -13,6 +13,13 @@ class ResponseQuery:
     vector_search: list[str]
 
 
+@dataclass(frozen=False)
+class ResponseReference:
+    url: str
+    # sub_links: list[str]
+    document_links: list[str]
+
+
 @dataclass(frozen=True)
 class ResponseResult:
     query: str
@@ -21,18 +28,20 @@ class ResponseResult:
     distance: float
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=False)
 class WebSearchResponse:
     query: ResponseQuery
-    references: list[str]
+    references: dict[str, ResponseReference]
     error_references: list[str]
-    results: list[dict]
+    results: list[list[dict]]
+    summary: str | None = None
 
     @staticmethod
     def empty() -> "WebSearchResponse":
         return WebSearchResponse(
             query=ResponseQuery(google_search=[], vector_search=[]),
-            references=[],
+            references={},
             error_references=[],
-            results=[]
+            results=[],
+            summary=None,
         )

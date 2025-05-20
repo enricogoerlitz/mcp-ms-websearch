@@ -1,5 +1,6 @@
 # MCP Agent for AI-Powered WebSearch
 
+![Source 1](/architecture/websearch-agent-process.v1.drawio.png)
 
 ```json
 // Parameters
@@ -30,10 +31,10 @@
         "MaxDepth": 2                           // How deep the search goes | GoogleLinks: 1, Links on GoogleLinksPage: 2, Links on GoogleLinksSubPage: 3 ...
     },
 
-    "Response": {
+    "response": {
         "Summarization": {                      // Sumarized response related to the initial user query
-            "Summarize": true,
-            "SummarizationContext": "string?"   // [optional] Optional extra context for the summarization prompt context
+            "enabled": true,
+            "prompt_context": "string?"   // [optional] Optional extra context for the summarization prompt context
         }
     }
 }

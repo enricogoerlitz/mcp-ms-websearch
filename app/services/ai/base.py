@@ -13,7 +13,7 @@ class IChatMessage(ABC):
 
 class IChatModel(ABC):
     @abstractmethod
-    def submit(self, messages: list[IChatMessage]) -> str: pass
+    def submit(self, messages: list[dict]) -> str: pass
 
 
 class IEmbeddingModel(ABC):
