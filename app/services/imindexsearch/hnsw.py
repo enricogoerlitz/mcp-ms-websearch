@@ -1,7 +1,7 @@
 import numpy as np
-import openai
 import hnswlib
 
+from services.ai.aimodels import embedding_model
 from services.imindexsearch.base import (
     IInMemoryIndexDB,
     IndexDBDocument,
@@ -62,11 +62,5 @@ class HNSWInMemoryIndexDB(IInMemoryIndexDB):
         return index
 
     def _embed_query(self, query: str) -> np.ndarray:
-        response = openai.embeddings.create(
-            input=query,
-            model="text-embedding-3-large"
-        )
-
-        embedding = np.array([record.embedding for record in response.data], dtype=np.float32)
-
+        embedding = embedding_model.embed(query)
         return embedding

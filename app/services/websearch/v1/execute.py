@@ -1,6 +1,6 @@
 import multiprocessing
-
 from concurrent.futures import ThreadPoolExecutor
+
 from services.websearch.base import IWebSearch
 from services.websearch.request import WebSearchRequest
 from services.websearch.response import (
@@ -25,57 +25,41 @@ class WebSearchV1(IWebSearch):
         self._index = InMemoryIndexDBFactory.new()
 
     def execute(self, req: WebSearchRequest) -> WebSearchResponse | str:
+        # 1. Initialize response
         response = WebSearchResponse.empty()
-        # 1. Generate google and vector search queries
+
+        # 2. Generate search queries
         queries = self._generate_google_and_vector_search_queries(req)
         if queries is None:
             return response
 
         google_queries, vector_queries_args, vector_queries = queries
 
-        # 3. Fetch google links
-        search_links = google.search(google_queries, req.query.search.google.max_result_count)
+        # 3. Perform Google search
+        search_links = self._fetch_google_links(google_queries, req)
+        response.references = self._create_init_response_references(search_links)
 
-        response.references = {link: ResponseReference(url=link, document_links=[]) for link in search_links}
-
-        # 4. Execute Thread Pool for Multithreading
+        # 4. Scrape web pages and perform vector search in parallel
         processes = min(multiprocessing.cpu_count(), len(search_links))
         with ThreadPoolExecutor(max_workers=processes) as pool:
-            # 4.1 Scrape web pages
-            scraped_pages: list[WebPageResult] = list(pool.map(webscraper.scrape, search_links))
-            pages_results, pages_text_chunks, err_urls = self._prepare_page_results(scraped_pages)
+            pages_results, pages_text_chunks, err_urls = self._scrape_web_pages(search_links, response, pool)
+            self._index_web_pages(pages_results, pages_text_chunks, pool)
+            vector_results = self._perform_vector_search(vector_queries_args, pool)
 
-            for page_result in pages_results:
-                ref = response.references[page_result.url]
-                # ref.sub_links = page_result.links
-                ref.document_links = page_result.document_links
-
-            # 4.2 Embed web pages texts
-            pages_embeddings = list(pool.map(embedding_model.embed_batch, pages_text_chunks))
-
-            # 4.3 Add embeddings to in-memory index db
-            for page, chunks, embeddings in zip(pages_results, pages_text_chunks, pages_embeddings):
-                self._index.add_batch(reference=page.url, texts=chunks, embeddings=embeddings)
-
-            # 4.4 Execute vector search
-            vector_results: list[dict] = list(pool.map(self._vector_search_wrapper, vector_queries_args))
-
+        # 5. Prepare response
         response.results = vector_results
-        response.query = ResponseQuery(
-            google_search=google_queries,
-            vector_search=vector_queries
-        )
+        response.query = ResponseQuery(google_search=google_queries, vector_search=vector_queries)
         response.error_references = err_urls
 
+        # 6. Summarize results if enabled
         if req.response.summarization.enabled:
-            self._summarize_results(req=req, resp=response)
+            response.summary = self._summarize_results(req, response)
 
         return response
 
     def _generate_google_and_vector_search_queries(
-            self,
-            req: WebSearchRequest
-    ) -> tuple[list[str], list[str], list[tuple[str, int, bool]]] | None:
+        self, req: WebSearchRequest
+    ) -> tuple[list[str], list[tuple[str, int, bool]], list[str]] | None:
         messages = gen_search_queries_messages(
             chat_messages=req.query.messages,
             prompt_context=req.query.search.prompt_context
@@ -87,7 +71,8 @@ class WebSearchV1(IWebSearch):
         if not queries.has_queries():
             return None
 
-        google_queries, vector_queries = queries.google_search_queries, queries.vector_search_queries
+        google_queries = queries.google_search_queries
+        vector_queries = queries.vector_search_queries
 
         vector_queries_args = [
             (query, req.query.search.vector.result_count, True)
@@ -96,10 +81,46 @@ class WebSearchV1(IWebSearch):
 
         return google_queries, vector_queries_args, vector_queries
 
-    def _prepare_page_results(self, page_results: list[WebPageResult]) -> tuple[list[WebPageResult], list[list[str]], list[str]]:
+    def _fetch_google_links(self, queries: list[str], req: WebSearchRequest) -> list[str]:
+        return google.search(queries, req.query.search.google.max_result_count)
+
+    def _create_init_response_references(self, links: list[str]) -> dict[str, ResponseReference]:
+        return {link: ResponseReference(url=link, document_links=[]) for link in links}
+
+    def _scrape_web_pages(
+        self,
+        links: list[str],
+        response: WebSearchResponse,
+        pool: ThreadPoolExecutor
+    ) -> tuple[list[WebPageResult], list[list[str]], list[str]]:
+        scraped_pages: list[WebPageResult] = list(pool.map(webscraper.scrape, links))
+        pages_results, pages_text_chunks, err_urls = self._prepare_page_results(scraped_pages)
+
+        for page_result in pages_results:
+            ref = response.references[page_result.url]
+            ref.document_links = page_result.document_links
+
+        return pages_results, pages_text_chunks, err_urls
+
+    def _index_web_pages(
+        self,
+        pages_results: list[WebPageResult],
+        pages_text_chunks: list[list[str]],
+        pool: ThreadPoolExecutor
+    ):
+        pages_embeddings = list(pool.map(embedding_model.embed_batch, pages_text_chunks))
+
+        for page, chunks, embeddings in zip(pages_results, pages_text_chunks, pages_embeddings):
+            self._index.add_batch(reference=page.url, texts=chunks, embeddings=embeddings)
+
+    def _prepare_page_results(
+        self,
+        page_results: list[WebPageResult]
+    ) -> tuple[list[WebPageResult], list[list[str]], list[str]]:
         prep_results = []
         pages_text_chunks = []
         err_urls = []
+
         for page in page_results:
             if page.content is not None:
                 prep_results.append(page)
@@ -110,15 +131,18 @@ class WebSearchV1(IWebSearch):
 
         return prep_results, pages_text_chunks, err_urls
 
+    def _perform_vector_search(
+        self,
+        vector_queries_args: list[tuple[str, int, bool]],
+        pool: ThreadPoolExecutor
+    ) -> list[dict]:
+        return list(pool.map(self._vector_search_wrapper, vector_queries_args))
+
     def _vector_search_wrapper(self, args: tuple[str, int, bool]) -> list[dict]:
         query, k, as_dict = args
         return self._index.search(query, k=k, as_dict=as_dict)
 
-    def _summarize_results(self, req: WebSearchRequest, resp: WebSearchResponse) -> None:
-        messages = gen_web_search_response_summary(
-            req=req,
-            resp=resp,
-        )
-
+    def _summarize_results(self, req: WebSearchRequest, resp: WebSearchResponse) -> str:
+        messages = gen_web_search_response_summary(req=req, resp=resp)
         summary = chat_model.submit(messages)
-        resp.summary = summary
+        return summary

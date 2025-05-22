@@ -13,12 +13,7 @@ class GoogleSearchPKGImpl(IGoogleSearch):
         ]
 
         max_link_count = len(queries) * n
-        seen = set()
-        search_links = [
-            link
-            for link in search_links
-            if not (urlparse(link).path in seen or seen.add(urlparse(link).path))
-        ][:max_link_count]
+        self._unique_links(search_links, max_link_count)
 
         return search_links
 
@@ -27,6 +22,16 @@ class GoogleSearchPKGImpl(IGoogleSearch):
             term=query.strip(),
             num_results=self._n_results(n, i)
         )
+
+    def _unique_links(self, links: list[str], max_link_count: int) -> list[str]:
+        seen = set()
+        search_links = [
+            link
+            for link in links
+            if not (urlparse(link).path in seen or seen.add(urlparse(link).path))
+        ][:max_link_count]
+
+        return search_links
 
     def _filter_condition(self, link: str) -> bool:
         return (

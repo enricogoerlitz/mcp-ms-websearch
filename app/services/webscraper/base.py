@@ -5,7 +5,7 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class WebPageResult:
     url: str
-    content: str
+    content: str | None
     links: list[str]
     document_links: list[str]
 

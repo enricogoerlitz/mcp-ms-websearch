@@ -4,7 +4,7 @@ from exc import httperrors
 
 
 VERSION = "v1"
-ROUTE = "healthcheck"
+ROUTE = "health"
 
 bp = Blueprint(ROUTE, __name__)
 

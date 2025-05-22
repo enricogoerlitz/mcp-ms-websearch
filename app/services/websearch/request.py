@@ -49,7 +49,6 @@ class RequestResponse(BaseModel):
 class WebSearchRequest(BaseModel):
     query: RequestQuery
     web_document_search: RequestWebDocumentSearch
-    deep_web_search: RequestDeepWebSearch
     response: RequestResponse
 
     def validate(self) -> None:

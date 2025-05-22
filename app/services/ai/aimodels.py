@@ -23,7 +23,7 @@ class EmbeddingModelFactory:
             case gvars.AI_EMBEDDING_MODEL_PROVIDER_OPENAI:
                 return OpenAIEmbeddingModel()
             case _:
-                raise ValueError(f"Unsupported chat model type: {type}")
+                raise ValueError(f"Unsupported embedding model type: {type}")
 
 
 chat_model: IChatModel = ChatModelFactory.create(evars.AI_CHAT_MODEL_PROVIDER)

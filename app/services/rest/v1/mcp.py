@@ -16,7 +16,7 @@ class WebSearchService:
             response = websearch.execute(req)
             return asdict(response), 200
         except Exception as e:
-            logger.error(str(e), exc_info=True)
+            logger.error(e, exc_info=True)
             return httperrors.UNEXPECTED_ERROR_RESULT
 
 

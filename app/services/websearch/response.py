@@ -16,7 +16,6 @@ class ResponseQuery:
 @dataclass(frozen=False)
 class ResponseReference:
     url: str
-    # sub_links: list[str]
     document_links: list[str]
 
 
