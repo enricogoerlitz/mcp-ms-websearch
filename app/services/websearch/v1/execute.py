@@ -5,7 +5,7 @@ from services.websearch.base import IWebSearch
 from services.websearch.request import WebSearchRequest
 from services.websearch.response import (
     WebSearchResponse,
-    ResponseQuery,
+    ResponseSearch,
     ResponseReference
 )
 from services.webscraper.base import WebPageResult
@@ -48,7 +48,7 @@ class WebSearchV1(IWebSearch):
 
         # 5. Prepare response
         response.results = vector_results
-        response.query = ResponseQuery(google_search=google_queries, vector_search=vector_queries)
+        response.search = ResponseSearch(google=google_queries, vector=vector_queries)
         response.error_references = err_urls
 
         # 6. Summarize results if enabled

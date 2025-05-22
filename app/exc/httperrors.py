@@ -1,3 +1,5 @@
+import pydantic
+
 from typing import Union
 
 UNEXPECTED_ERROR_RESULT = (
@@ -9,6 +11,22 @@ UNEXPECTED_ERROR_RESULT = (
 
 def bad_request(exp: Union[str, Exception]) -> tuple[dict, int]:
     return {"message": str(exp)}, 400
+
+
+def bad_request_pydantic_validation(exp: pydantic.ValidationError) -> tuple[dict, int]:
+    errors = [
+        {
+            "field": ".".join(str(loc) for loc in err["loc"]),
+            "error": err["msg"]
+        }
+        for err in exp.errors()
+    ]
+
+    msg = "Invalid request payload: " + str(errors)
+
+    return {
+        "message": msg
+    }, 400
 
 
 def unauthorized(exp: Union[str, Exception] = None) -> tuple[dict, int]:

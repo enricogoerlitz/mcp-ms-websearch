@@ -55,8 +55,8 @@ Your goal is to:
 def gen_web_search_response_summary(req: WebSearchRequest, resp: WebSearchResponse) -> str:
     prompt = GENERATE_RESULTS_SUMMARIZATION.format(
         WEB_SEARCH_RESULTS=str(resp.results),
-        GOOGLE_SEARCH_QUERIES=resp.query.google_search,
-        VECTOR_SEARCH_QUERIES=resp.query.vector_search,
+        GOOGLE_SEARCH_QUERIES=resp.search.google,
+        VECTOR_SEARCH_QUERIES=resp.search.vector,
         ADDITIONAL_SUMMARIZATION_CONTEXT_PROMPT=req.response.summarization.prompt_context,
     )
 

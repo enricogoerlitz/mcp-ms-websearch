@@ -8,9 +8,9 @@ class ResponseQueryMessage:
 
 
 @dataclass(frozen=True)
-class ResponseQuery:
-    google_search: list[str]
-    vector_search: list[str]
+class ResponseSearch:
+    google: list[str]
+    vector: list[str]
 
 
 @dataclass(frozen=False)
@@ -29,7 +29,7 @@ class ResponseResult:
 
 @dataclass(frozen=False)
 class WebSearchResponse:
-    query: ResponseQuery
+    search: ResponseSearch
     references: dict[str, ResponseReference]
     error_references: list[str]
     results: list[list[dict]]
@@ -38,7 +38,7 @@ class WebSearchResponse:
     @staticmethod
     def empty() -> "WebSearchResponse":
         return WebSearchResponse(
-            query=ResponseQuery(google_search=[], vector_search=[]),
+            search=ResponseSearch(google=[], vector=[]),
             references={},
             error_references=[],
             results=[],
