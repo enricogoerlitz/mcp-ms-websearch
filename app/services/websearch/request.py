@@ -8,19 +8,22 @@ class RequestQueryMessage(BaseModel):
 
 
 class RequestQueryGoogleSearch(BaseModel):
-    prompt_context: str | None
     max_result_count: int
 
 
 class RequestQueryVectorSearch(BaseModel):
-    prompt_context: str | None
     result_count: int
+
+
+class RequestQuerySearch(BaseModel):
+    prompt_context: str | None
+    google: RequestQueryGoogleSearch
+    vector: RequestQueryVectorSearch
 
 
 class RequestQuery(BaseModel):
     messages: List[dict]
-    google_search: RequestQueryGoogleSearch
-    vector_search: RequestQueryVectorSearch
+    search: RequestQuerySearch
 
 
 class RequestWebDocumentSearch(BaseModel):
@@ -50,9 +53,9 @@ class WebSearchRequest(BaseModel):
     response: RequestResponse
 
     def validate(self) -> None:
-        if self.query.google_search.max_result_count < 1:
+        if self.query.search.google.max_result_count < 1:
             raise ValueError("Google search result count must be greater than 0.")
-        if self.query.vector_search.result_count < 1:
+        if self.query.search.vector.result_count < 1:
             raise ValueError("Vector search result count must be greater than 0.")
         if self.web_document_search.max_documents < 1:
             raise ValueError("Web document search max documents must be greater than 0.")

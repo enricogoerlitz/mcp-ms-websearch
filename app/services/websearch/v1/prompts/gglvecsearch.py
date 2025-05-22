@@ -31,6 +31,9 @@ You are an AI assistant specializing in generating structured search queries for
 - Ensure the output is valid JSON syntax.
 - Do not include duplicate or paraphrased queries.
 - Do not answer the user's questions.
+
+### Additional Instructions (optional):
+{PROMPT_CONTEXT}
 """
 
 
@@ -38,7 +41,9 @@ def gen_search_queries_messages(
         chat_messages: list[dict],
         prompt_context: str,
 ) -> list[dict]:
-    prompt = GENERATE_STRUCTURED_SEARCH_QUERIES_JSON
+    prompt = GENERATE_STRUCTURED_SEARCH_QUERIES_JSON.replace(
+        "{PROMPT_CONTEXT}", prompt_context if prompt_context else ""
+    )
 
     messages = [
         *chat_messages,

@@ -13,7 +13,8 @@ class DefaultWebScraper(IWebScraper):
             resp = requests.get(url, timeout=evars.HTTP_TIMEOUT)
         except Exception as e:
             msg = f"Error by handling url {url}: {str(e)}"
-            logger.info(msg)
+            logger.warning(msg)
+            logger.warning(e, exc_info=True)
             return self._empty_result(url)
 
         if resp.status_code != 200:

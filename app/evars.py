@@ -20,7 +20,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Web Scraper
 WEBSCRAPER_TYPE = os.getenv("WEBSCRAPER_TYPE", "DEFAULT")
-HTTP_TIMEOUT = int(os.getenv("HTTP_TIMEOUT", 10))
+HTTP_TIMEOUT = int(os.getenv("HTTP_TIMEOUT", 15))
 GOOGLE_SEARCH_PROVIDER = os.getenv("GOOGLE_SEARCH_PROVIDER", "GOOGLESEARCHPKG")
 
 # Text chunk size

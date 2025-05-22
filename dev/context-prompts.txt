@@ -1,0 +1,77 @@
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+INITIAL WEB SEARCH FOR DEVICE
+-----------------------------
+Frage:
+Fisher & Paykel Healthcare Limited AIRVO 3 Atemtherapiegerät (WAAE) Konformität und Einsatzbereiche? Fisher & Paykel Healthcare Limited AIRVO 3 Zweckbestimmung? Fisher & Paykel Healthcare Limited AIRVO 3 technische Spezifikationen?
+
+
+Context:
+### Device Informations:
+- Device Manufacturer: 'Fisher & Paykel Healthcare Limited'
+- Device Designation: 'AIRVO 3'
+- Device Type: 'Atemtherapiegerät (WAAE)'
+
+### Important Instructions
+**For the google search, use the following queries:**
+- Fisher & Paykel Healthcare Limited AIRVO 3 Atemtherapiegerät (WAAE) Konformität und Einsatzbereiche
+- Fisher & Paykel Healthcare Limited AIRVO 3 Zweckbestimmung
+- Fisher & Paykel Healthcare Limited AIRVO 3 technische Spezifikationen
+
+
+Summarization Context:
+### Device Informations:
+- Device Manufacturer: 'Fisher & Paykel Healthcare Limited'
+- Device Designation: 'AIRVO 3'
+- Device Type: 'Atemtherapiegerät (WAAE)'
+
+### Response Instructions:
+- If a section is missing in all texts, state: "Not provided in the given information."
+    - Exception: 'Additional Information' — include all other details that do not fit into the predefined structure.
+- Ensure logical flow, consistency, and contextual relevance.
+- Provide as much relevant and accurate information as possible, with a detailed approach.
+- Use Markdown formatting for readability, including headings, bullet points, and emphasis.
+    - Headings: Start with h2 (## ...)
+
+### Context:
+This research supports an analysis of a device from our custom catalog in preparation for an upcoming discussion based on a received request.
+
+### Summary Structure:
+- **Definition**
+- **Synonyms**
+- **Purpose of Use**
+- **Technical Functionality** (use bullet points detailed)
+- **MDR (Medical Device Regulation) Risk Classes**
+- **Application Areas:**
+    - Target users (e.g., children, adults)
+    - Functional scope
+- **Clinical Classification** (Is it used clinically?)
+- **Active or Inactive Status**
+- **Medical Device Status** (including relevant standards, if applicable)
+- **Electrical Classification** (Power supply: Yes/No)
+- **Additional Information** (Any other relevant details from the provided text. Be detailed.)
+
+
+
+"search"."prompt_context": "### Device Informations:\n- Device Manufacturer: 'Fisher & Paykel Healthcare Limited'\n-Device Designation: 'AIRVO 3'\n- Device Type: 'Atemtherapiegerät (WAAE)'\n\n### Important Instructions\n**For the google search, use the following queries:**\n- Fisher & Paykel Healthcare Limited AIRVO 3 Atemtherapiegerät (WAAE) Konformität und Einsatzbereiche\n- Fisher & Paykel Healthcare Limited AIRVO 3 Zweckbestimmung\n- Fisher & Paykel Healthcare Limited AIRVO 3 technische Spezifikationen"
+"summarization"."prompt_context": "### Device Informations:\n- Device Manufacturer: 'Fisher & Paykel Healthcare Limited'\n-Device Designation: 'AIRVO 3'\n- Device Type: 'Atemtherapiegerät (WAAE)'\n\n### Response Instructions:\n- If a section is missing in all texts, state: "Not provided in the given information."\n\t- Exception: 'Additional Information' — include all other details that do not fit into the predefined structure.\n- Ensure logical flow, consistency, and contextual relevance.\n- Provide as much relevant and accurate information as possible, with a detailed approach.\n- Use Markdown formatting for readability, including headings, bullet points, and emphasis.\n\t- Headings: Start with h2 (## ...)\n\n### Context:\nThis research supports an analysis of a device from our custom catalog in preparation for an upcoming discussion based on a received request.\n\n### Summary Structure:\n\t- **Definition**\n\t- **Synonyms**\n\t- **Purpose of Use**\n\t- **Technical Functionality** (use bullet points detailed)\n\t- **MDR (Medical Device Regulation) Risk Classes**\n\t- **Application Areas:**\n\t\t- Target users (e.g., children, adults)\n\t\t- Functional scope\n\t- **Clinical Classification** (Is it used clinically?)\n\t- **Active or Inactive Status**\n\t- **Medical Device Status** (including relevant standards, if applicable)\n\t- **Electrical Classification** (Power supply: Yes/No)\n\t- **Additional Information** (Any other relevant details from the provided text. Be detailed.)"
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+query_extensions = [
+    "Konformität und Einsatzbereiche",
+    "Zweckbestimmung",
+    "technische Spezifikationen"
+]
+
+req = self.chat.context.typecode_request
+base_query = f"{req.manufacturer} {req.device_designation} {req.device_type}"
+
+custom_queries = [
+    f"{req.device_designation} device",
+    base_query
+]
+
+queries = custom_queries + [
+    f"{base_query} {ext}" for ext in query_extensions
+]

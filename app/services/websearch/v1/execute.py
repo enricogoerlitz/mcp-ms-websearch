@@ -15,8 +15,8 @@ from services.ai.aimodels import embedding_model, chat_model
 from services.ai import aiutils
 from services.imindexsearch.indexdb import InMemoryIndexDBFactory
 from services.websearch.v1.prompts.gglvecsearch import gen_search_queries_messages
-from services.websearch.v1.prompts.objects import LLMQuestionQueries
-from services.websearch.v1.summarize import gen_web_search_response_summary
+from services.websearch.v1.dto import LLMQuestionQueries
+from services.websearch.v1.prompts.summarize import gen_web_search_response_summary
 
 
 class WebSearchV1(IWebSearch):
@@ -34,7 +34,7 @@ class WebSearchV1(IWebSearch):
         google_queries, vector_queries_args, vector_queries = queries
 
         # 3. Fetch google links
-        search_links = google.search(google_queries, req.query.google_search.max_result_count)
+        search_links = google.search(google_queries, req.query.search.google.max_result_count)
 
         response.references = {link: ResponseReference(url=link, document_links=[]) for link in search_links}
 
@@ -76,26 +76,21 @@ class WebSearchV1(IWebSearch):
             self,
             req: WebSearchRequest
     ) -> tuple[list[str], list[str], list[tuple[str, int, bool]]] | None:
-        # messages = gen_google_and_vector_search_queries_messages(
-        #     chat_messages=req.query.messages,
-        #     google_prompt_context=req.query.google_search.prompt_context,
-        #     vector_prompt_context=req.query.vector_search.prompt_context
-        # )
         messages = gen_search_queries_messages(
             chat_messages=req.query.messages,
-            prompt_context=req.query.google_search.prompt_context
+            prompt_context=req.query.search.prompt_context
         )
 
         queries_raw = chat_model.submit(messages)
         queries = LLMQuestionQueries.from_lmm_response(queries_raw)
 
-        if not queries.has_questions():
+        if not queries.has_queries():
             return None
 
         google_queries, vector_queries = queries.google_search_queries, queries.vector_search_queries
 
         vector_queries_args = [
-            (query, req.query.vector_search.result_count, True)
+            (query, req.query.search.vector.result_count, True)
             for query in vector_queries
         ]
 

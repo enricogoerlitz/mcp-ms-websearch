@@ -25,7 +25,7 @@ class LLMQuestionQueries:
                 vector_search_queries=response_dict["vector_search_queries"]
             )
         except Exception as e:
-            raise Exception(f"Failed to parse LLM response to QuestionQueries: {e}")
+            raise Exception(f"Failed to parse LLM response to QuestionQueries: {e}, Response: {response}")
 
-    def has_questions(self) -> bool:
+    def has_queries(self) -> bool:
         return len(self.extracted_questions) > 0
