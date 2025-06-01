@@ -7,8 +7,21 @@ class RequestQueryMessage(BaseModel):
     content: str
 
 
+class RequestWebDocumentSearch(BaseModel):
+    enabled: bool = False
+    max_documents: int = 5
+    max_document_mb_size: int = 1 * 1024 * 1024  # 1 MB
+
+    def __post_init__(self):
+        if self.max_documents < 1:
+            raise ValueError("Max documents must be greater than 0.")
+        if self.max_document_mb_size < 1:
+            raise ValueError("Max document size must be greater than 0.")
+
+
 class RequestQueryGoogleSearch(BaseModel):
     max_result_count: int = 5
+    web_document_search: RequestWebDocumentSearch = Field(default_factory=RequestWebDocumentSearch)
 
 
 class RequestQueryVectorSearch(BaseModel):
@@ -24,12 +37,6 @@ class RequestQuerySearch(BaseModel):
 class RequestQuery(BaseModel):
     messages: List[dict]
     search: RequestQuerySearch = Field(default_factory=RequestQuerySearch)
-
-
-class RequestWebDocumentSearch(BaseModel):
-    enabled: bool = False
-    max_documents: int = 5
-    max_document_mb_size: int = 1 * 1024 * 1024  # 1 MB
 
 
 class RequestDeepWebSearch(BaseModel):
@@ -48,7 +55,6 @@ class RequestResponse(BaseModel):
 
 class WebSearchRequest(BaseModel):
     query: RequestQuery
-    web_document_search: RequestWebDocumentSearch = Field(default_factory=RequestWebDocumentSearch)
     response: RequestResponse = Field(default_factory=RequestResponse)
 
     def validate(self) -> None:
@@ -56,7 +62,3 @@ class WebSearchRequest(BaseModel):
             raise ValueError("Google search result count must be greater than 0.")
         if self.query.search.vector.result_count < 1:
             raise ValueError("Vector search result count must be greater than 0.")
-        if self.web_document_search.max_documents < 1:
-            raise ValueError("Web document search max documents must be greater than 0.")
-        if self.web_document_search.max_document_mb_size < 1:
-            raise ValueError("Web document search max document size must be greater than 0.")

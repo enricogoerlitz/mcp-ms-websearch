@@ -2,12 +2,6 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class ResponseQueryMessage:
-    role: str
-    message: str
-
-
-@dataclass(frozen=True)
 class ResponseSearch:
     google: list[str]
     vector: list[str]
@@ -17,14 +11,6 @@ class ResponseSearch:
 class ResponseReference:
     url: str
     document_links: list[str]
-
-
-@dataclass(frozen=True)
-class ResponseResult:
-    query: str
-    reference: str
-    text: str
-    distance: float
 
 
 @dataclass(frozen=False)
